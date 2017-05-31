@@ -20,7 +20,6 @@ import rx.Observer;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 
@@ -49,15 +48,24 @@ public class MainActivity extends AppCompatActivity {
             final ApplicationsAdapter applicationsAdapter = new ApplicationsAdapter();
 
             Observable<AppInfo> appInfoObservable = Observable.from(Applicationlist.getInstance().getList())
-                    .filter(new Func1<AppInfo, Boolean>() {
-                        @Override
-                        public Boolean call(AppInfo appInfo) {
-                            return appInfo.mName.startsWith("A");
+//                    .map(appInfo -> {
+//                         appInfo.mName = appInfo.mName.toUpperCase();
+//
+//                        return appInfo;
+//                    });
+                    .scan((appInfo, appInfo2) -> {
+                        if (appInfo.mName.length() > appInfo2.mName.length()) {
+                            return appInfo;
                         }
-                    });
+                        return appInfo2;
+                    }).distinct();
+            //.filter(appInfo -> appInfo.mName.startsWith("B"))
+//                    .takeLast(3);
             appInfoObservable.subscribe(new Subscriber<AppInfo>() {
+
                 @Override
                 public void onCompleted() {
+
                     recyclerView.setAdapter(applicationsAdapter);
 
                 }
@@ -86,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             AppInfo appInfoTwo = list.get(1);
             AppInfo appInfoThree = list.get(2);
 
-            Observable<AppInfo> justAppInfoObservable = Observable.just(appInfoOne, appInfoTwo, appInfoThree).repeat(3);
+            Observable<AppInfo> justAppInfoObservable = Observable.just(appInfoOne, appInfoTwo, appInfoThree).repeat(3).distinct();
 
             justAppInfoObservable.subscribe(new Subscriber<AppInfo>() {
                 @Override
