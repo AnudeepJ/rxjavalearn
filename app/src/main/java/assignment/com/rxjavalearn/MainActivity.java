@@ -1,5 +1,6 @@
 package assignment.com.rxjavalearn;
 
+import android.app.Application;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -9,6 +10,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+
+import com.google.common.collect.Lists;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -83,6 +86,34 @@ public class MainActivity extends AppCompatActivity {
             });
 
 
+        });
+
+        findViewById(R.id.merge).setOnClickListener(view -> {
+            final ApplicationsAdapter applicationsAdapter = new ApplicationsAdapter();
+            List<AppInfo> list = Applicationlist.getInstance().getList();
+            List<AppInfo> reversedInfoList = Lists.reverse(list);
+
+            Observable<AppInfo> from = Observable.from(list);
+            Observable<AppInfo> reverseList = Observable.from(reversedInfoList);
+            Observable<AppInfo> merge = Observable.merge(from, reverseList);
+            merge.subscribe(new Observer<AppInfo>() {
+                @Override
+                public void onCompleted() {
+                    recyclerView.setAdapter(applicationsAdapter);
+
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                                                     e.printStackTrace();
+                }
+
+                @Override
+                public void onNext(AppInfo appInfo) {
+                    applicationsAdapter.addItem(appInfo);
+
+                }
+            });
         });
 
 
